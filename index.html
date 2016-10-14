@@ -1,0 +1,157 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-sanitize/1.5.8/angular-sanitize.js"></script>
+  <script src="/home/arthur/ng-file-model/ng-file-model.js"></script>
+<link rel="stylesheet" href="http://www.w3schools.com/lib/w3.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<style>
+body,h1 {font-family: "Raleway", sans-serif}
+body, html {height: 100%}
+.bgimg-1 {
+    background-image: url('http://www.wallpaperup.com/uploads/wallpapers/2014/02/08/249577/big_thumb_5d77ff7875d7947da9e1229e716dcde2.jpg');
+    min-height: 100%;
+    background-position: center;
+    background-size: 100% 100%;
+}
+</style>
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body ng-app="myApp" ng-controller="myCtrl" class="bgimg-1">
+<div class="bgimg-1 w3-display-container w3-animate-opacity w3-text-black">
+  <div class="w3-display-middle">
+    <h3 style="margin-top:15%;"class="w3-jumbo w3-animate-top  w3-text-white">Create and Test your Neural Network</h3>
+     <p class="text-muted">&copy; Developed by Arthur Sena</p>
+    <hr class="w3-border-grey" style="margin:auto;width:40%">
+   <div class="container"  style="margin: 0 auto; width:200px;">
+	<form style="margin: 4% auto; width:250px; background-color: white; padding:10% 10%;" ng-submit = "train()">
+
+    	<div class="form-group">
+			<label for="size"> Size:</label> 
+			<input id="size" min="1" type="number" ng-model="master.size" class="form-control">
+		</div>
+
+		<div class="form-group">
+			<label for="maxit">Max. Iteration:</label>
+			<input id="maxit" min="0" type="number	" ng-model="master.maxit" class="form-control">
+		</div>
+
+		<div class="form-group">
+			<label for = "decay">Learning Rate:</label>
+			 <input id = "decay" type="number" step="0.01" ng-model="master.decay" class="form-control">
+		</div>
+
+		<div class="form-group">
+			<label for="target">Target Variable: </label>
+			<input  id="target"type="text" ng-model="master.target" class="form-control">
+		</div>
+		<div class="form-group">	
+			<label for="train"> Train file:</label>
+			 <input id="train" type="file" ng-file-model="treino" >
+			 <!-- <input type="text" ng-model="uploadme.name"/> -->
+		</div>
+
+		<div class="form-group">
+			<label for="test" >Test file: </label>
+			<input id="test"  type="file" ng-file-model="test" >
+		</div>
+		<input type="submit" class="btn btn-default" data-toggle="modal" data-target="#myModal">
+	</form>
+	
+	
+
+  </div>
+
+
+	</div>
+	</div>
+
+	<footer class="footer">
+      <div class="container">
+       
+      </div>
+    </footer>
+
+
+	<div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog">
+    
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">See your results below</h4>
+        </div>
+        <div class="modal-body">
+          <p ng-bind-html = "ans"/>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+
+</body>
+
+<script>
+var app = angular.module('myApp', ['ngSanitize','ng-file-model']);
+app.controller('myCtrl', function($scope,$http) {
+
+	$scope.ans = ""
+	$scope.master = {size:20,
+					decay:0.01,
+					maxit:20,
+					target:"Species",
+					train: 'irisTrain.csv',
+					test: 'irisTest.csv'}
+	$scope.treino = {};
+	$scope.test = {};
+	// $scope.uploadme.src = "";
+    $scope.train = function(){
+    	$http({
+		        url: 'http://127.0.0.1:5000/singlelayer',
+		        method: "GET",
+		        params: {   'size': $scope.master.size,
+				            'decay': $scope.master.decay,
+				            'maxit' : $scope.master.maxit,
+				            'target' : $scope.master.target,
+		        			'train': $scope.treino.name,
+				            'test': $scope.test.name
+            			 }
+		    })
+		    .then(function(response) {
+		          $scope.ans = response.data;
+		          console.log(response.data)
+		    }, 
+		    function(response) { // optional
+		            console.log("Erro");
+		    });
+   		 }
+});
+
+
+app.directive("fileread", [function () {
+    return {
+        scope: {
+            fileread: "="
+        },
+        link: function (scope, element, attributes) {
+            element.bind("change", function (changeEvent) {
+                scope.$apply(function () {
+                    scope.fileread = changeEvent.target.files[0];
+                    // or all selected files:
+                    // scope.fileread = changeEvent.target.files;
+                });
+            });
+        }
+    }
+}]);
+</script> 
+</html>	
